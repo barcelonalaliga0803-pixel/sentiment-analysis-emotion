@@ -106,3 +106,43 @@ for s in test_sentences:
 joblib.dump(model, 'emotion_model.pkl')
 joblib.dump(vectorizer, 'tfidf_vectorizer.pkl')
 print("Model və vectorizer saxlandı!")
+# ====================== Gradio interfeysi (optional, amma tapşırıqda qeyd olunub) ======================
+try:
+    import gradio as gr
+
+    def gradio_predict(text):
+        if not text.strip():
+            return "Zəhmət olmasa bir cümlə yazın."
+        
+        emotion, prob = predict_emotion(text)
+        return f"**Duyğu: {emotion}**\nEhtimal: {prob:.2%}"
+
+    # Gradio interfeysi
+    iface = gr.Interface(
+        fn=gradio_predict,
+        inputs=gr.Textbox(
+            lines=3,
+            placeholder="Buraya öz cümlənizi yazın (məsələn: I feel so happy today!)",
+            label="Cümlə daxil edin"
+        ),
+        outputs=gr.Markdown(),
+        title="Emotion (Duyğu) Təyinedici",
+        description="Model 6 emosiyanı tanıyır: sadness, joy, love, anger, fear, surprise",
+        examples=[
+            ["I feel so sad and lonely today"],
+            ["Today is the best day ever, I'm so happy!"],
+            ["I'm really angry right now!"],
+            ["I'm scared of what will happen tomorrow"],
+            ["Wow! I can't believe I won!"],
+            ["I love spending time with you so much"]
+        ],
+        theme="soft"  # gözəl görünüş üçün
+    )
+
+    print("\nGradio serveri işə salınır... Brauzerdə http://127.0.0.1:7860 açılacaq.")
+    iface.launch(share=False)  # share=True etsən publik link verər (amma diqqətli ol)
+
+except ImportError:
+    print("Gradio quraşdırılmayıb. Quraşdırmaq üçün: pip install gradio")
+except Exception as e:
+    print(f"Gradio işə salınarkən xəta: {e}")
